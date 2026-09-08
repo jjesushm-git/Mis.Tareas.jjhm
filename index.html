@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="es" data-theme="emerald_gold">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f5c43" />
+  <title>Mis Tareas</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Organizador personal</p>
+        <h1 id="appTitle">Mis Tareas</h1>
+      </div>
+      <div class="top-actions">
+        <label class="active-book-select-wrap" title="Cambiar libro">
+          <select id="activeBookSelect" class="active-book-select" aria-label="Libro activo"></select>
+        </label>
+        <button id="settingsBtnTop" class="icon-btn" title="Ajustes">⚙</button>
+      </div>
+    </header>
+
+    <section class="week-strip" id="weekStrip"></section>
+
+    <nav class="view-tabs">
+      <button data-view="calendar" class="view-tab active">Calendario</button>
+      <button data-view="day" class="view-tab">Día</button>
+      <button data-view="week" class="view-tab">Semana</button>
+      <button data-view="board" class="view-tab">Tablero</button>
+    </nav>
+
+    <section class="expense-summary-bar" id="expenseSummaryBar">
+      <div>
+        <strong id="expenseDayTotal">Gastos del día: $0.00 MN</strong>
+        <small id="expenseMonthTotal">Total del mes: $0.00 MN</small>
+      </div>
+      <div class="expense-actions">
+        <button id="viewExpensesBtn" class="expense-eye-btn" title="Ver gastos registrados" aria-label="Ver gastos registrados">
+          <svg class="expense-eye-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M2.5 12s3.4-5.5 9.5-5.5S21.5 12 21.5 12 18.1 17.5 12 17.5 2.5 12 2.5 12Z"></path>
+            <circle cx="12" cy="12" r="2.6"></circle>
+          </svg>
+        </button>
+        <button id="addExpenseBtn" class="expense-add-btn" title="Agregar gasto">+$</button>
+      </div>
+    </section>
+
+    <main>
+      <section id="dayView" class="view">
+        <div class="section-heading day-heading">
+          <div class="day-title-block">
+            <p class="eyebrow">Vista diaria</p>
+            <h2 id="selectedDateTitle"></h2>
+          </div>
+          <div class="day-nav-actions">
+            <button id="prevDayBtn" class="icon-btn" title="Día anterior">‹</button>
+            <label class="date-picker-btn" title="Seleccionar fecha">
+              <span>📅</span>
+              <input id="dayDatePicker" type="date" />
+            </label>
+            <button id="nextDayBtn" class="icon-btn" title="Día siguiente">›</button>
+            <button id="todayBtn" class="ghost-btn">Hoy</button>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <section class="panel" id="pendingSection">
+          <div class="panel-head">
+            <div>
+              <h3>Próximas</h3>
+              <p>Ordenadas de la más cercana a vencer a la más lejana.</p>
+            </div>
+            <select id="pendingFilter" class="select">
+              <option value="all">Todas</option>
+              <option value="today">Hoy</option>
+              <option value="upcoming" selected>Próximas</option>
+              <option value="recurring">Recurrentes</option>
+            </select>
+          </div>
+          <div id="pendingList" class="task-list"></div>
+        </section>
+
+        <section class="panel" id="completedSection">
+          <div class="panel-head">
+            <div>
+              <h3 class="green">Completadas</h3>
+              <p>Las tareas marcadas quedan registradas aquí.</p>
+            </div>
+          </div>
+          <div id="completedList" class="task-list"></div>
+        </section>
+
+        <section class="panel" id="missedSection">
+          <div class="panel-head">
+            <div>
+              <h3 class="red">No completadas</h3>
+              <p>Las tareas vencidas dejan de notificar automáticamente.</p>
+            </div>
+          </div>
+          <div id="missedList" class="task-list"></div>
+        </section>
+      </section>
+
+      <section id="calendarView" class="view active">
+        <div class="section-heading">
+          <button id="prevMonth" class="icon-btn">‹</button>
+          <div class="center">
+            <p class="eyebrow">Calendario</p>
+            <h2 id="calendarTitle"></h2>
+          </div>
+          <button id="nextMonth" class="icon-btn">›</button>
+        </div>
+        <div class="calendar panel">
+          <div class="calendar-weekdays">
+            <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+          </div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3 id="calendarDayHeading">Tareas del día</h3>
+              <p>Toca un día para ver sus tareas.</p>
+            </div>
+          </div>
+          <div id="calendarDayList" class="task-list"></div>
+        </div>
+      </section>
+
+      <section id="weekView" class="view">
+        <div class="section-heading">
+          <button id="prevWeek" class="icon-btn">‹</button>
+          <div class="center">
+            <p class="eyebrow">Semana</p>
+            <h2 id="weekTitle"></h2>
+          </div>
+          <button id="nextWeek" class="icon-btn">›</button>
+        </div>
+        <div id="weekBoard" class="week-board"></div>
+      </section>
+
+      <section id="boardView" class="view">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Organización</p>
+            <h2>Tablero de actividades</h2>
+          </div>
+        </div>
+
+        <div id="boardStats" class="board-stats"></div>
+
+        <div class="board-scroll">
+          <section class="board-column" data-board-column="pending">
+            <div class="board-column-head">
+              <h3>Pendientes</h3><span id="boardCountPending">0</span>
+            </div>
+            <div id="boardPending" class="board-list"></div>
+          </section>
+
+          <section class="board-column" data-board-column="in_progress">
+            <div class="board-column-head">
+              <h3>En proceso</h3><span id="boardCountProgress">0</span>
+            </div>
+            <div id="boardProgress" class="board-list"></div>
+          </section>
+
+          <section class="board-column" data-board-column="waiting">
+            <div class="board-column-head">
+              <h3>En espera</h3><span id="boardCountWaiting">0</span>
+            </div>
+            <div id="boardWaiting" class="board-list"></div>
+          </section>
+
+          <section class="board-column" data-board-column="completed">
+            <div class="board-column-head">
+              <h3>Completadas</h3><span id="boardCountCompleted">0</span>
+            </div>
+            <div id="boardCompleted" class="board-list"></div>
+          </section>
+        </div>
+      </section>
+
+<section id="trashView" class="view">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Recuperación</p>
+            <h2>Papelera</h2>
+          </div>
+          <button id="emptyTrashBtn" class="danger-btn">Vaciar</button>
+        </div>
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>Tareas eliminadas</h3>
+              <p>Se conservan durante 24 horas antes de eliminarse definitivamente.</p>
+            </div>
+          </div>
+          <div id="trashList" class="task-list"></div>
+        </section>
+      </section>
+    </main>
+
+
+    <nav class="bottom-nav">
+      <button data-view="day" class="bottom-tab"><span>✓</span>Tareas</button>
+      <button data-view="calendar" class="bottom-tab active"><span>▦</span>Calendario</button>
+      <button id="bottomAddBtn" class="bottom-add"><span>＋</span>Agregar</button>
+      <button id="booksBtn" class="bottom-tab"><span>📖</span>Libro</button>
+      <button data-view="trash" class="bottom-tab"><span>🗑</span>Papelera</button>
+    </nav>
+  </div>
+
+  <dialog id="taskDialog" class="modal">
+    <form id="taskForm" method="dialog">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Nueva / editar</p>
+          <h2 id="taskDialogTitle">Agregar tarea</h2>
+        </div>
+        <button type="button" class="icon-btn" id="closeTaskDialog">✕</button>
+      </div>
+
+      <input type="hidden" id="taskId" />
+
+      <label>Título *
+        <input id="title" maxlength="120" required placeholder="Ej. Enviar reporte semanal" />
+      </label>
+
+      <label>Descripción
+        <textarea id="description" rows="4" maxlength="2000" placeholder="Descripción larga de la tarea..."></textarea>
+      </label>
+
+      <label>Emoticono de la tarea
+        <button type="button" id="chooseTaskEmojiBtn" class="emoji-picker-trigger">
+          <span id="taskEmojiPreview" class="emoji-preview">📌</span>
+          <span>Elegir emoticono</span>
+        </button>
+        <input id="taskEmoji" type="hidden" value="📌" />
+      </label>
+
+      <div class="two-cols">
+        <label>Fecha de inicio *
+          <input id="startDate" type="date" required />
+        </label>
+        <label>Fecha de vencimiento <small>(opcional)</small>
+          <input id="dueDate" type="date" />
+        </label>
+      </div>
+
+      <div class="switch-row">
+        <div>
+          <strong>Todo el día</strong>
+          <small>Desactiva para seleccionar hora específica.</small>
+        </div>
+        <label class="switch"><input id="allDay" type="checkbox" checked><span></span></label>
+      </div>
+
+      <div id="timeFields" class="two-cols hidden">
+        <label>Hora inicio
+          <input id="startTime" type="time" />
+        </label>
+        <label>Hora vencimiento
+          <input id="dueTime" type="time" />
+        </label>
+      </div>
+
+      <div class="three-cols">
+        <label>Repetir
+          <select id="recurrence">
+            <option value="none">No repetir</option>
+            <option value="daily">Diario</option>
+            <option value="weekly">Semanal</option>
+            <option value="monthly">Mensual</option>
+            <option value="yearly">Anual</option>
+          </select>
+        </label>
+        <label>Estado
+          <select id="status">
+            <option value="pending">Pendiente</option>
+            <option value="completed">Completada</option>
+            <option value="missed">No completada</option>
+          </select>
+        </label>
+        <label>Tablero
+          <select id="boardStage">
+            <option value="pending">Pendiente</option>
+            <option value="in_progress">En proceso</option>
+            <option value="waiting">En espera</option>
+            <option value="completed">Completada</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="switch-row importance-switch-row">
+        <div>
+          <strong>Alta importancia</strong>
+          <small>Al activarla, esta tarea se mostrará en todos los libros.</small>
+        </div>
+        <label class="switch"><input id="highImportance" type="checkbox"><span></span></label>
+      </div>
+
+      <label>Comentario
+        <textarea id="comment" rows="3" maxlength="1000" placeholder="Notas, seguimiento o comentario..."></textarea>
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" id="deleteTaskBtn" class="danger-btn hidden">Eliminar</button>
+        <button type="button" id="cancelTaskBtn" class="ghost-btn">Cancelar</button>
+        <button type="submit" class="primary-btn">Guardar tarea</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog" class="modal">
+    <div class="modal-head">
+      <div><p class="eyebrow">Preferencias y respaldo</p><h2>Ajustes</h2></div>
+      <button class="icon-btn" id="closeSettings">✕</button>
+    </div>
+    <div class="settings-stack">
+      <details class="settings-group" id="settingsVisualGroup">
+        <summary><span>🎨 Visual</span><small>Tema, título y vista</small></summary>
+        <div class="settings-group-body">
+          <label>Tema de color
+            <select id="themeSelect">
+              <option value="emerald_gold">Esmeralda dorado</option>
+              <option value="midnight_violet">Noche violeta</option>
+              <option value="ocean_blue">Azul océano</option>
+              <option value="graphite">Grafito</option>
+            </select>
+          </label>
+          <label>Vista predeterminada de tareas
+            <select id="defaultPendingFilter">
+              <option value="all">Todas</option><option value="today">Hoy</option><option value="upcoming">Próximas</option><option value="recurring">Recurrentes</option>
+            </select>
+          </label>
+          <label>Título de la aplicación
+            <input id="customAppTitle" type="text" maxlength="18" placeholder="Mis Tareas" autocomplete="off" />
+            <small>Máximo 18 caracteres.</small>
+          </label>
+        </div>
+      </details>
+
+      <details class="settings-group" id="settingsExpenseGroup">
+        <summary><span>💰 Gastos</span><small>Configuración del libro activo</small></summary>
+        <div class="settings-group-body">
+          <label>Día de inicio para sumar gastos del mes
+            <select id="expenseCycleDay"></select>
+            <small>Este valor se guarda de forma independiente para el libro activo.</small>
+          </label>
+        </div>
+      </details>
+
+      <details class="settings-group" id="settingsTransferGroup">
+        <summary><span>⇅ Exportar / importar</span><small>Respaldos y archivos</small></summary>
+        <div class="settings-group-body settings-actions-list">
+          <button id="exportExpensesTxtBtn" class="settings-item"><span>📄</span><div><strong>Exportar gastos TXT</strong><small>Descarga todos los gastos registrados en formato de texto.</small><small id="lastExportTxt" class="last-export-mark">Nunca descargado</small></div></button>
+          <button id="exportExpensesCsvBtn" class="settings-item"><span>📊</span><div><strong>Exportar gastos CSV</strong><small>Descarga los gastos para abrirlos en Excel u otra hoja de cálculo.</small><small id="lastExportCsv" class="last-export-mark">Nunca descargado</small></div></button>
+          <button id="exportBtn" class="settings-item"><span>⬇️</span><div><strong>Exportar respaldo de tareas</strong><small>Descarga tus tareas en formato JSON.</small><small id="lastExportBackup" class="last-export-mark">Nunca descargado</small></div></button>
+          <label class="settings-item file-item"><span>⬆️</span><div><strong>Importar respaldo de tareas</strong><small>Restaura tareas desde un archivo JSON.</small></div><input id="importInput" type="file" accept=".json,application/json" hidden /></label>
+        </div>
+      </details>
+
+      <details class="settings-group" id="settingsAboutGroup">
+        <summary><span>ℹ️ Acerca de</span><small>Versión y actualización</small></summary>
+        <div class="settings-group-body settings-actions-list">
+          <div class="settings-item"><span>ℹ️</span><div><strong>Versión instalada</strong><small id="appVersion">11.1 REPARADA</small></div></div>
+          <button id="updateAppBtn" class="settings-item"><span>🔄</span><div><strong>Actualizar aplicación</strong><small>Busca y carga la versión más reciente publicada.</small></div></button>
+        </div>
+      </details>
+
+      <button id="saveSettingsBtn" class="primary-btn" type="button">Guardar cambios</button>
+      <div id="settingsSavedMessage" class="saved-message hidden">Los cambios han sido guardados.</div>
+      <button id="clearBtn" class="settings-item danger-outline"><span>🗑️</span><div><strong>Borrar todos los datos</strong><small>Elimina tareas, papelera y gastos guardados en este dispositivo.</small></div></button>
+    </div>
+  </dialog>
+
+  
+  <dialog id="expenseDialog" class="modal">
+    <form id="expenseForm" method="dialog">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Registro de gasto</p>
+          <h2>Agregar gasto</h2>
+        </div>
+        <button type="button" class="icon-btn" id="closeExpenseDialog">✕</button>
+      </div>
+
+      <div class="expense-date-nav">
+        <button type="button" data-expense-shift="-month" title="Mes anterior">&lt;&lt;&lt;</button>
+        <button type="button" data-expense-shift="-week" title="Semana anterior">&lt;&lt;</button>
+        <button type="button" data-expense-shift="-day" title="Día anterior">&lt;</button>
+        <strong id="expenseDateLabel">08.09.2026</strong>
+        <button type="button" data-expense-shift="+day" title="Día siguiente">&gt;</button>
+        <button type="button" data-expense-shift="+week" title="Semana siguiente">&gt;&gt;</button>
+        <button type="button" data-expense-shift="+month" title="Mes siguiente">&gt;&gt;&gt;</button>
+      </div>
+
+      <input id="expenseDate" type="hidden" />
+      <input id="expenseId" type="hidden" />
+
+      <label>¿En qué gasté? *
+        <input id="expenseTitle" maxlength="120" required placeholder="Ej. Comida, gasolina, farmacia..." />
+      </label>
+
+      <label>Descripción
+        <textarea id="expenseDescription" rows="3" maxlength="1000" placeholder="Detalle opcional del gasto..."></textarea>
+      </label>
+
+      <label>Monto *
+        <div class="money-input-wrap money-input-pretty">
+          <span class="money-symbol">$</span>
+          <input id="expenseAmountDisplay" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00" />
+          <input id="expenseAmount" type="hidden" />
+          <button type="button" id="expenseCurrencyBtn" class="currency-btn">MN</button>
+        </div>
+        <small class="money-help">Máximo $99,999,999.99</small>
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" id="cancelExpenseBtn" class="ghost-btn">Cancelar</button>
+        <button type="submit" class="primary-btn">Guardar gasto</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+
+
+  <dialog id="viewExpensesDialog" class="modal">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">Consulta de gastos</p>
+        <h2>Gastos registrados</h2>
+      </div>
+      <button type="button" class="icon-btn" id="closeViewExpensesDialog">✕</button>
+    </div>
+
+    <div class="expense-date-nav expense-date-nav-one-line">
+      <button type="button" data-view-expense-shift="-month">&lt;&lt;&lt;</button>
+      <button type="button" data-view-expense-shift="-week">&lt;&lt;</button>
+      <button type="button" data-view-expense-shift="-day">&lt;</button>
+      <strong id="viewExpenseDateLabel"></strong>
+      <button type="button" data-view-expense-shift="+day">&gt;</button>
+      <button type="button" data-view-expense-shift="+week">&gt;&gt;</button>
+      <button type="button" data-view-expense-shift="+month">&gt;&gt;&gt;</button>
+    </div>
+
+    <input id="viewExpenseDate" type="hidden" />
+    <div id="viewExpenseDayTotal" class="expense-view-total"></div>
+    <div id="viewExpensesList" class="expense-list"></div>
+  </dialog>
+
+
+  
+  <dialog id="comicConfirmDialog" class="comic-confirm-dialog">
+    <div class="comic-bubble">
+      <div class="comic-bubble-tail"></div>
+      <div class="comic-confirm-icon">!</div>
+      <h3 id="comicConfirmTitle">Confirmar</h3>
+      <p id="comicConfirmMessage">¿Deseas continuar?</p>
+      <div class="comic-confirm-actions">
+        <button type="button" id="comicConfirmCancel" class="ghost-btn">Cancelar</button>
+        <button type="button" id="comicConfirmOk" class="danger-btn">Sí, continuar</button>
+      </div>
+    </div>
+  </dialog>
+
+  
+  <dialog id="emojiDialog" class="modal emoji-dialog">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">Personaliza tu tarea</p>
+        <h2>Elegir emoticono</h2>
+      </div>
+      <button type="button" class="icon-btn" id="closeEmojiDialog">✕</button>
+    </div>
+    <div class="emoji-section">
+      <h3>Tareas y trabajo</h3>
+      <div id="emojiWorkGrid" class="emoji-grid"></div>
+    </div>
+    <div class="emoji-section">
+      <h3>Organización y actividades</h3>
+      <div id="emojiTaskGrid" class="emoji-grid"></div>
+    </div>
+    <div class="emoji-section"><h3>Dinero y compras</h3><div id="emojiMoneyGrid" class="emoji-grid"></div></div>
+    <div class="emoji-section"><h3>Comida</h3><div id="emojiFoodGrid" class="emoji-grid"></div></div>
+    <div class="emoji-section"><h3>Sociales y otros</h3><div id="emojiSocialGrid" class="emoji-grid"></div></div>
+    <div class="emoji-section theme-zelda-only"><h3>Estilo aventura</h3><div id="emojiZeldaGrid" class="emoji-grid"></div></div>
+  </dialog>
+
+  
+  <dialog id="emojiSavedDialog" class="emoji-saved-dialog">
+    <div class="emoji-saved-bubble">
+      <button type="button" class="emoji-saved-close" id="closeEmojiSavedDialog" aria-label="Cerrar">✕</button>
+      <div class="emoji-saved-icon" id="emojiSavedIcon">📌</div>
+      <h3>Emoticono actualizado</h3>
+      <p>El cambio ha sido guardado correctamente.</p>
+    </div>
+  </dialog>
+
+  
+  <dialog id="booksDialog" class="modal books-dialog">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">Biblioteca personal</p>
+        <h2>Libros</h2>
+      </div>
+      <button type="button" class="icon-btn" id="closeBooksDialog">✕</button>
+    </div>
+
+    <div id="booksList" class="books-list books-select-list"></div>
+
+    <button id="toggleBookFormBtn" type="button" class="book-form-toggle">
+      <span>Administrar libros</span>
+      <span id="bookFormChevron">⌄</span>
+    </button>
+
+    <div id="bookFormPanel" class="books-add-panel hidden">
+      <label id="bookFormLabel">Agregar libro
+        <input id="bookNameInput" type="text" maxlength="20" placeholder="Máximo 20 caracteres" autocomplete="off" />
+      </label>
+
+      <div class="book-customize-grid">
+        <div>
+          <small class="book-customize-label">Icono</small>
+          <div id="bookIconPicker" class="book-icon-picker"></div>
+        </div>
+        <div>
+          <small class="book-customize-label">Color</small>
+          <div id="bookColorPicker" class="book-color-picker"></div>
+        </div>
+      </div>
+
+      <input id="bookIconInput" type="hidden" value="📖" />
+      <input id="bookColorInput" type="hidden" value="#725cff" />
+
+      <div class="book-form-actions">
+        <button id="deleteBookBtn" type="button" class="danger-btn hidden">🗑 Borrar libro</button>
+        <button id="addBookBtn" type="button" class="primary-btn hidden">＋ Agregar libro</button>
+      </div>
+
+      <small id="bookNameCounter" class="book-counter">0/20</small>
+    </div>
+
+    <div class="books-footer-note">
+      <span>Solo puede haber un libro seleccionado.</span>
+      <small>Si cierras sin seleccionar uno, se usará automáticamente el primero de la lista.</small>
+    </div>
+  </dialog>
+
+  <dialog id="commentDialog" class="modal comment-dialog">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">Comentario de tarea</p>
+        <h2 id="commentDialogTitle">Comentario</h2>
+      </div>
+      <button type="button" class="icon-btn" id="closeCommentDialog">✕</button>
+    </div>
+    <div id="commentDialogBody" class="comment-dialog-body"></div>
+  </dialog>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
